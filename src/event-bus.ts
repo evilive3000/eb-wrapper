@@ -1,27 +1,22 @@
-import {Message, PubSub, Subscription, SubscriptionOptions, Topic} from '@google-cloud/pubsub';
-import {GoogleAuth} from 'google-auth-library';
+import {PubSub, Topic} from "@google-cloud/pubsub";
+import {Event} from "./events/event-interface";
+import {Listener} from "./listener";
+import {PublishOptions} from "@google-cloud/pubsub/build/src/publisher";
 
-const createPubSub = (() => {
-  const auth = new GoogleAuth();
-  const client = new PubSub({auth});
-  return () => client;
-})();
-
-// export interface EventBusOptions {
-//   client?: PubSub;
-// }
+const mapGetSetDefault = <T>(hmap: Map<any, T>, key: any, def: () => T): T => {
+  if (!hmap.has(key)) {
+    hmap.set(key, def())
+  }
+  return hmap.get(key)!;
+}
 
 export class EventBus {
   private static instance: EventBus;
   private client: PubSub;
-  private subscriptions = new Map<string, Subscription>();
   private topics = new Map<string, Topic>();
 
-  // constructor(options?: EventBusOptions) {
-  //   this.client = options?.client || createPubSub();
-  // }
   private constructor() {
-    this.client = createPubSub();
+    this.client = new PubSub(/*{auth: new GoogleAuth()}*/);
   }
 
   private static getInstance(): EventBus {
@@ -32,33 +27,24 @@ export class EventBus {
     return EventBus.instance;
   }
 
-  static on(subscriptionName: string, handler: (msg: Message) => Promise<any>): void {
+  static async publish(event: Event): Promise<any> {
     const bus = EventBus.getInstance();
-    let subscription = bus.subscriptions.get(subscriptionName);
+    // todo: options
+    const options: PublishOptions = {};
 
-    if (!subscription) {
-      const subscriptionOptions: SubscriptionOptions = {};
-      subscription = bus.client.subscription(subscriptionName, subscriptionOptions);
-      bus.subscriptions.set(subscriptionName, subscription);
-    }
+    const topic = mapGetSetDefault(
+      bus.topics,
+      event.topic,
+      () => bus.client.topic(event.topic, options)
+    )
 
-    subscription.on('message', (msg: Message) => {
-      handler(msg)
-        .then((res) => (res === false ? msg.nack() : msg.ack()))
-        .catch(console.error);
-    });
+    return topic.publish(event.toBuffer());
   }
 
-  static async dispatch(topicName: string, message: string): Promise<string> {
+  static subscribe(listeners: Listener<Event>[]): void {
     const bus = EventBus.getInstance();
-    let topic = bus.topics.get(topicName);
-
-    if (!topic) {
-      topic = bus.client.topic(topicName);
-      bus.topics.set(topicName, topic);
-    }
-
-    const dataBuffer = Buffer.from(message);
-    return topic.publish(dataBuffer);
+    listeners.forEach(listener => {
+      listener.listen(bus.client);
+    })
   }
 }
