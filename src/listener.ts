@@ -1,5 +1,5 @@
 import {Message, PubSub} from "@google-cloud/pubsub";
-import {Event} from './events/event-interface.js'
+import {Event} from './events'
 
 export abstract class Listener<E extends Event> {
   abstract subscriptionName: string;

@@ -1,7 +1,7 @@
 import {PubSub, Topic} from "@google-cloud/pubsub";
-import {Event} from "./events/event-interface";
-import {Listener} from "./listener";
 import {PublishOptions} from "@google-cloud/pubsub/build/src/publisher";
+import {Listener} from "./listener";
+import {Event} from './events'
 
 const mapGetSetDefault = <T>(hmap: Map<any, T>, key: any, def: () => T): T => {
   if (!hmap.has(key)) {
@@ -9,6 +9,9 @@ const mapGetSetDefault = <T>(hmap: Map<any, T>, key: any, def: () => T): T => {
   }
   return hmap.get(key)!;
 }
+
+// todo: надо в конструкторе проверять есть ли необходимые данные для авторизации на гуглосервисе.
+// если нет, то кидать соответствующее исключение.
 
 export class EventBus {
   private static instance: EventBus;
@@ -27,7 +30,7 @@ export class EventBus {
     return EventBus.instance;
   }
 
-  static async publish(event: Event): Promise<any> {
+  static async publish(event: Event): Promise<string> {
     const bus = EventBus.getInstance();
     // todo: options
     const options: PublishOptions = {};
