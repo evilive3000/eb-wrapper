@@ -1,10 +1,7 @@
 import {Event} from "./event-interface";
 import {Topics} from "../topics";
 
-export enum Verdict {
-  danger = 'danger',
-  safe = 'safe',
-}
+type Verdict = 'danger' | 'safe';
 
 export class VerdictChangedEvent implements Event {
   topic = Topics.VerdictChanged;
