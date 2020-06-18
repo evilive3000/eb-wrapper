@@ -1,16 +1,14 @@
 import {Event} from "./event-interface";
 import {Topics} from "../topics";
 
-type Verdict = 'danger' | 'safe';
-
-export class VerdictChangedEvent implements Event {
+export class VerdictChangedEvent<V> implements Event {
   topic = Topics.VerdictChanged;
   data: {
     mediaId: string;
-    verdict: Verdict
+    verdict: V
   }
 
-  constructor(mediaId: string, verdict: Verdict) {
+  constructor(mediaId: string, verdict: V) {
     this.data = {mediaId, verdict}
   }
 
