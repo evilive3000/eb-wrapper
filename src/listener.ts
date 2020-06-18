@@ -1,4 +1,4 @@
-import {Message, PubSub} from "@google-cloud/pubsub";
+import {Message, PubSub, Subscription} from "@google-cloud/pubsub";
 import {Event} from './events'
 
 export abstract class Listener<E extends Event> {
@@ -14,11 +14,17 @@ export abstract class Listener<E extends Event> {
     return JSON.parse(data.toString('utf-8'));
   }
 
-  listen(client: PubSub) {
+  listen(client: PubSub): Subscription {
     const subscription = client.subscription(this.subscriptionName);
-    subscription.on('message', (msg: Message) => {
-      const data = this.parseMessage(msg);
-      this.onMessage(data, msg);
+    return subscription.on('message', (msg: Message) => {
+      try {
+        const data = this.parseMessage(msg);
+        this.onMessage(data, msg);
+      } catch (e) {
+        // todo: отправлять ошибки в отдельный топик
+        console.error({e, data: msg.data.toString()});
+        msg.ack();
+      }
     });
   }
 }

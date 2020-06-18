@@ -1,4 +1,4 @@
-import {PubSub, Topic} from "@google-cloud/pubsub";
+import {PubSub, Subscription, Topic} from "@google-cloud/pubsub";
 import {PublishOptions} from "@google-cloud/pubsub/build/src/publisher";
 import {Listener} from "./listener";
 import {Event} from './events'
@@ -44,10 +44,8 @@ export class EventBus {
     return topic.publish(event.toBuffer());
   }
 
-  static subscribe(listeners: Listener<Event>[]): void {
+  static subscribe(listener: Listener<Event>): Subscription {
     const bus = EventBus.getInstance();
-    listeners.forEach(listener => {
-      listener.listen(bus.client);
-    })
+    return listener.listen(bus.client);
   }
 }
