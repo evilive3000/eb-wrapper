@@ -7,7 +7,11 @@ export abstract class Listener<E extends Event> {
   protected constructor() {
   }
 
-  abstract onMessage(data: E['data'], msg: Message): void;
+  protected handleError(err: Error, msg: Message) {
+    console.error({err, data: msg.data.toString()});
+  }
+
+  abstract onMessage(data: E['data'], done: (err?: any) => any): void;
 
   parseMessage(msg: Message): E['data'] {
     const {data} = msg;
@@ -19,10 +23,10 @@ export abstract class Listener<E extends Event> {
     return subscription.on('message', (msg: Message) => {
       try {
         const data = this.parseMessage(msg);
-        this.onMessage(data, msg);
+        this.onMessage(data, (err) => err ? this.handleError(err, msg) : msg.ack());
       } catch (e) {
         // todo: отправлять ошибки в отдельный топик
-        console.error({e, data: msg.data.toString()});
+        this.handleError(e, msg);
         msg.ack();
       }
     });
