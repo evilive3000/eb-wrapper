@@ -1,3 +1,4 @@
 export enum Topics {
-  VerdictChanged = 'verdict-changed'
+  VerdictChanged = 'verdict-changed',
+  MediaUpdated = 'media-updated',
 }
