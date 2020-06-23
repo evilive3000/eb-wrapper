@@ -6,11 +6,10 @@ export class MediaUpdatedEvent implements Event {
   data: {
     id: string;
     changed: Record<string, any>;
-    doc: Record<string, any>;
   };
 
-  constructor(id: string, changed: Record<string, any>, doc: Record<string, any>) {
-    this.data = {id, changed, doc}
+  constructor(id: string, changed: Record<string, any>) {
+    this.data = {id, changed}
   }
 
   toBuffer(): Buffer {
