@@ -33,7 +33,12 @@ export class EventBus {
   static async publish(event: Event): Promise<string> {
     const bus = EventBus.getInstance();
     // todo: options
-    const options: PublishOptions = {};
+    const options: PublishOptions = {
+      batching: {
+        maxMilliseconds: 100,
+        maxMessages: 1000,
+      }
+    };
 
     const topic = mapGetSetDefault(
       bus.topics,
