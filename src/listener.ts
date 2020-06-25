@@ -1,34 +1,39 @@
+import {promisify} from 'util';
 import {Message, PubSub, Subscription} from "@google-cloud/pubsub";
 import {Event} from './events'
+import {ErrorCaughtEvent} from "./events/error-caught";
+import {EventBus} from "./event-bus";
 
 export abstract class Listener<E extends Event> {
   abstract subscriptionName: string;
 
   protected constructor() {
+    if (this.onMessage.length === 2) {
+      this.onMessage = promisify(this.onMessage);
+    }
   }
 
-  protected handleError(err: Error, msg: Message) {
-    console.error({err, data: msg.data.toString()});
+  protected onError(err: any, msg: Message): void {
+    EventBus.publish(new ErrorCaughtEvent(err, msg, this)).catch(console.error)
+    console.error({err, msg});
   }
 
+  abstract onMessage(data: E['data']): Promise<any>;
   abstract onMessage(data: E['data'], done: (err?: any) => any): void;
 
-  parseMessage(msg: Message): E['data'] {
+  async parseMessage(msg: Message): Promise<E['data']> {
     const {data} = msg;
-    return JSON.parse(data.toString('utf-8'));
+    return Promise.resolve(JSON.parse(data.toString('utf-8')));
   }
 
   listen(client: PubSub): Subscription {
     const subscription = client.subscription(this.subscriptionName);
+
     return subscription.on('message', (msg: Message) => {
-      try {
-        const data = this.parseMessage(msg);
-        this.onMessage(data, (err) => err ? this.handleError(err, msg) : msg.ack());
-      } catch (e) {
-        // todo: отправлять ошибки в отдельный топик
-        this.handleError(e, msg);
-        msg.ack();
-      }
+      this.parseMessage(msg)
+        .then(data => this.onMessage(data))
+        .catch(err => this.onError(err, msg))
+        .finally(() => msg.ack())
     });
   }
 }
