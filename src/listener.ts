@@ -1,4 +1,3 @@
-import {promisify} from 'util';
 import {Message, PubSub, Subscription} from "@google-cloud/pubsub";
 import {Event} from './events'
 import {ErrorCaughtEvent} from "./events/error-caught";
@@ -7,11 +6,7 @@ import {EventBus} from "./event-bus";
 export abstract class Listener<E extends Event> {
   abstract subscriptionName: string;
 
-  protected constructor() {
-    if (this.onMessage.length === 2) {
-      this.onMessage = promisify(this.onMessage);
-    }
-  }
+  protected constructor() {}
 
   protected onError(err: any, msg: Message): void {
     EventBus.publish(new ErrorCaughtEvent(err, msg, this)).catch(console.error)
@@ -19,7 +14,6 @@ export abstract class Listener<E extends Event> {
   }
 
   abstract onMessage(data: E['data']): Promise<any>;
-  abstract onMessage(data: E['data'], done: (err?: any) => any): void;
 
   async parseMessage(msg: Message): Promise<E['data']> {
     const {data} = msg;

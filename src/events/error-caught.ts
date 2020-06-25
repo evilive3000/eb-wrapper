@@ -17,7 +17,7 @@ export class ErrorCaughtEvent implements Event {
       subscription: listener.subscriptionName,
       publishTime: msg.publishTime.toISOString(),
       data: msg.data.toString(),
-      error: JSON.stringify(err),
+      error: err.message || JSON.stringify(err),
     }
   }
 
