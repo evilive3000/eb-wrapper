@@ -1,5 +1,6 @@
 export enum Topics {
-  VerdictChanged = 'verdict-changed',
   MediaUpdated = 'media-updated',
+  MediaDeleted = 'media-deleted',
+  VerdictChanged = 'verdict-changed',
   ErrorCaught = 'error-caught',
 }
