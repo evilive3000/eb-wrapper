@@ -1,9 +1,9 @@
 import {Message} from "@google-cloud/pubsub";
-import {Event} from "./event-interface";
+import {PubSubEvent} from "./event-interface";
 import {Topics} from "../topics";
 import {Listener} from "../listener";
 
-export class ErrorCaughtEvent implements Event {
+export class ErrorCaughtEvent implements PubSubEvent {
   topic = Topics.ErrorCaught;
   data: {
     error: string;

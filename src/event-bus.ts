@@ -1,7 +1,7 @@
 import {PubSub, Subscription, Topic} from "@google-cloud/pubsub";
 import {PublishOptions} from "@google-cloud/pubsub/build/src/publisher";
 import {Listener} from "./listener";
-import {Event} from './events'
+import {PubSubEvent} from './events'
 
 const mapGetSetDefault = <T>(hmap: Map<any, T>, key: any, def: () => T): T => {
   if (!hmap.has(key)) {
@@ -30,7 +30,7 @@ export class EventBus {
     return EventBus.instance;
   }
 
-  static async publish(event: Event): Promise<string> {
+  static async publish(event: PubSubEvent): Promise<string> {
     const bus = EventBus.getInstance();
     // todo: options
     const options: PublishOptions = {
@@ -49,7 +49,7 @@ export class EventBus {
     return topic.publish(event.toBuffer());
   }
 
-  static subscribe(listener: Listener<Event>): Subscription {
+  static subscribe(listener: Listener<PubSubEvent>): Subscription {
     const bus = EventBus.getInstance();
     return listener.listen(bus.client);
   }

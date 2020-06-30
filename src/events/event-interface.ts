@@ -1,6 +1,6 @@
 import {Topics} from "../topics";
 
-export interface Event {
+export interface PubSubEvent {
   readonly topic: Topics;
   readonly data: unknown;
 

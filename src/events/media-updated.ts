@@ -1,7 +1,7 @@
-import {Event} from "./event-interface";
+import {PubSubEvent} from "./event-interface";
 import {Topics} from "../topics";
 
-export class MediaUpdatedEvent implements Event {
+export class MediaUpdatedEvent implements PubSubEvent {
   topic = Topics.MediaUpdated;
   data: {
     id: string;

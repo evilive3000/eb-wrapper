@@ -1,9 +1,9 @@
 import {Message, PubSub, Subscription} from "@google-cloud/pubsub";
-import {Event} from './events'
+import {PubSubEvent} from './events'
 import {ErrorCaughtEvent} from "./events/error-caught";
 import {EventBus} from "./event-bus";
 
-export abstract class Listener<E extends Event> {
+export abstract class Listener<E extends PubSubEvent> {
   abstract subscriptionName: string;
 
   protected constructor() {}
@@ -13,7 +13,7 @@ export abstract class Listener<E extends Event> {
     console.error({err, msg});
   }
 
-  abstract onMessage(data: E['data']): Promise<any>;
+  abstract async onMessage(data: E['data']): Promise<any>;
 
   async parseMessage(msg: Message): Promise<E['data']> {
     const {data} = msg;
