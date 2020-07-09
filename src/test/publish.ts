@@ -1,5 +1,5 @@
 import {ebus} from "../event-bus";
-import {MediaUpdatedEvent} from "../../dist/events";
+import {MediaUpdatedEvent} from "../events";
 
 console.log(process.env.URL)
 

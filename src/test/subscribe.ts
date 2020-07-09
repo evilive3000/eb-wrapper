@@ -2,7 +2,7 @@ import {Listener} from "../listener";
 import {ebus} from "../event-bus";
 import {Topics} from "../topics";
 import {ErrorCaughtEvent} from "../events/error-caught";
-import {MediaUpdatedEvent} from "../../dist/events";
+import {MediaUpdatedEvent} from "../events";
 
 class ErrorListener extends Listener<ErrorCaughtEvent> {
   topic = Topics.ErrorCaught;

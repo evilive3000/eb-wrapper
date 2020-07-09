@@ -19,6 +19,6 @@ export class MediaDeletedEvent extends MediaEvent {
   topic = Topics.MediaDeleted;
 }
 
-export class MediaUpdateEvent extends MediaEvent {
+export class MediaUpdatedEvent extends MediaEvent {
   topic = Topics.MediaUpdated;
 }
