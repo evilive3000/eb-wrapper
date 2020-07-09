@@ -1,5 +1,5 @@
-import {Message} from "@google-cloud/pubsub";
-import {PubSubEvent} from "./event-interface";
+import {Message} from "node-nats-streaming";
+import {PubSubEvent} from "./pubsub-event";
 import {Topics} from "../topics";
 import {Listener} from "../listener";
 
@@ -14,9 +14,9 @@ export class ErrorCaughtEvent implements PubSubEvent {
 
   constructor(err: any, msg: Message, listener: Listener<any>) {
     this.data = {
-      subscription: listener.subscriptionName,
-      publishTime: msg.publishTime.toISOString(),
-      data: msg.data.toString(),
+      subscription: listener.groupName,
+      publishTime: msg.getTimestamp().toISOString(),
+      data: msg.getData().toString(),
       error: err.message || JSON.stringify(err),
     }
   }

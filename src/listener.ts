@@ -1,27 +1,45 @@
-import {Message, PubSub, Subscription} from "@google-cloud/pubsub";
 import {PubSubEvent} from './events'
 import {ErrorCaughtEvent} from "./events/error-caught";
-import {EventBus} from "./event-bus";
+import {Message, Stan, Subscription} from "node-nats-streaming";
+import {Topics} from "./topics";
+import {ebus} from "./event-bus";
 
 export abstract class Listener<E extends PubSubEvent> {
-  abstract subscriptionName: string;
+  abstract topic: Topics;
+  abstract groupName: string;
+  protected ackWait = 5 * 1000;
 
-  protected constructor() {}
+  async parseMessage(msg: Message): Promise<E['data']> {
+    const data = msg.getData();
 
-  protected onError(err: any, msg: Message): void {
-    EventBus.publish(new ErrorCaughtEvent(err, msg, this)).catch(console.error)
-    console.error({err, msg});
+    return Promise.resolve(
+      JSON.parse(
+        typeof data === 'string'
+          ? data
+          : data.toString('utf-8'))
+    );
   }
 
   abstract async onMessage(data: E['data']): Promise<any>;
 
-  async parseMessage(msg: Message): Promise<E['data']> {
-    const {data} = msg;
-    return Promise.resolve(JSON.parse(data.toString('utf-8')));
+  protected onError(err: any, msg: Message): void {
+    ebus
+      .publish(new ErrorCaughtEvent(err, msg, this))
+      .catch(console.error)
+
+    console.error({err, msg});
   }
 
-  listen(client: PubSub): Subscription {
-    const subscription = client.subscription(this.subscriptionName);
+  listen(client: Stan): Subscription {
+    const subscription = client.subscribe(
+      this.topic,
+      this.groupName,
+      client.subscriptionOptions()
+        .setDeliverAllAvailable()
+        .setManualAckMode(true)
+        .setAckWait(this.ackWait)
+        .setDurableName(this.groupName)
+    )
 
     return subscription.on('message', (msg: Message) => {
       this.parseMessage(msg)

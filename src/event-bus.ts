@@ -1,56 +1,63 @@
-import {PubSub, Subscription, Topic} from "@google-cloud/pubsub";
-import {PublishOptions} from "@google-cloud/pubsub/build/src/publisher";
+import nats, {Stan, Subscription} from "node-nats-streaming";
 import {Listener} from "./listener";
 import {PubSubEvent} from './events'
+import {randomBytes} from "crypto";
+import Debug from "debug";
 
-const mapGetSetDefault = <T>(hmap: Map<any, T>, key: any, def: () => T): T => {
-  if (!hmap.has(key)) {
-    hmap.set(key, def())
-  }
-  return hmap.get(key)!;
+const debug = Debug('ebus')
+
+export interface NatsConnectionOptions {
+  clusterId: string;
+  clientId?: string;
+  url: string;
 }
 
-// todo: надо в конструкторе проверять есть ли необходимые данные для авторизации на гуглосервисе.
-// если нет, то кидать соответствующее исключение.
+class EventBus {
+  private _client: Stan | null = null;
 
-export class EventBus {
-  private static instance: EventBus;
-  private client: PubSub;
-  private topics = new Map<string, Topic>();
+  async connect(options: NatsConnectionOptions) {
+    const {
+      clusterId,
+      clientId = randomBytes(4).toString('hex'),
+      url
+    } = options;
 
-  private constructor() {
-    this.client = new PubSub(/*{auth: new GoogleAuth()}*/);
+    debug('nats connect: %o', {clusterId, clientId, url})
+    const client = nats.connect(clusterId, clientId, {url})
+
+    return new Promise<() => void>((resolve, reject) => {
+      client.on('connect', () => {
+        debug('nats connected')
+        this._client = client;
+        resolve(() => client.close());
+      });
+      client.on('error', reject);
+    })
   }
 
-  private static getInstance(): EventBus {
-    if (!EventBus.instance) {
-      EventBus.instance = new EventBus();
+  get client(): Stan {
+    if (this._client === null) {
+      throw new Error('Can not access NATS client before connecting.');
     }
 
-    return EventBus.instance;
+    return this._client;
   }
 
-  static async publish(event: PubSubEvent): Promise<string> {
-    const bus = EventBus.getInstance();
-    // todo: options
-    const options: PublishOptions = {
-      batching: {
-        maxMilliseconds: 100,
-        maxMessages: 1000,
-      }
-    };
-
-    const topic = mapGetSetDefault(
-      bus.topics,
-      event.topic,
-      () => bus.client.topic(event.topic, options)
-    )
-
-    return topic.publish(event.toBuffer());
+  async publish(event: PubSubEvent): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const guid = this.client.publish(
+        event.topic,
+        event.toBuffer(),
+        (err, guid) => err ? reject(err) : resolve(guid)
+      )
+      debug('published to "%s"; guid: %s', event.topic, guid)
+    })
   }
 
-  static subscribe(listener: Listener<PubSubEvent>): Subscription {
-    const bus = EventBus.getInstance();
-    return listener.listen(bus.client);
+  subscribe(listener: Listener<PubSubEvent>): Subscription {
+    debug('subscribe groupName: "%s"; topic: "%s"', listener.groupName, listener.topic)
+    return listener.listen(this.client);
   }
 }
+
+export const ebus = new EventBus();
