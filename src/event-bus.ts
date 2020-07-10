@@ -7,23 +7,27 @@ import Debug from "debug";
 const debug = Debug('ebus')
 
 export interface NatsConnectionOptions {
-  clusterId: string;
+  clusterId?: string;
   clientId?: string;
-  url: string;
+  url?: string;
 }
 
 class EventBus {
   private _client: Stan | null = null;
 
-  async connect(options: NatsConnectionOptions) {
+  async connect(options: NatsConnectionOptions = {}) {
     const {
-      clusterId,
+      clusterId = process.env.NATS_CID!,
       clientId = randomBytes(4).toString('hex'),
-      url
+      url = process.env.NATS_URL!
     } = options;
 
     debug('nats connect: %o', {clusterId, clientId, url})
     const client = nats.connect(clusterId, clientId, {url})
+
+    if (!clusterId || !url) {
+      throw new Error("You must provide `clusterId` and `url`.")
+    }
 
     return new Promise<() => void>((resolve, reject) => {
       client.on('connect', () => {
