@@ -39,6 +39,7 @@ export abstract class Listener<E extends PubSubEvent> {
         .setManualAckMode(true)
         .setAckWait(this.ackWait)
         .setDurableName(this.groupName)
+        .setMaxInFlight(1)
     )
 
     return subscription.on('message', (msg: Message) => {
