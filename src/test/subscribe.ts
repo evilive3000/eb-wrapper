@@ -14,12 +14,12 @@ class ErrorListener extends Listener<ErrorCaughtEvent> {
 }
 
 class CustomListener extends Listener<MediaUpdatedEvent> {
-  topic = Topics.MediaUpdated;
-  groupName = 'custom-listener';
+  topic = Topics.MediaSafetyUpdated;
+  groupName = 'test-subs';
 
   async onMessage(data: MediaUpdatedEvent["data"]): Promise<any> {
-    if (Math.random() > 0.75)
-      throw new Error('Event Error Occurred')
+    // if (Math.random() > 0.75)
+    //   throw new Error('Event Error Occurred')
     console.log({data})
   }
 }

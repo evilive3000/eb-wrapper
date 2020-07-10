@@ -13,7 +13,7 @@ ebus.connect({
     new MediaUpdatedEvent(
       new Date().toISOString(),
       {
-        googleSafe: 'safe',
+        isSafe: true,
         tags: []
       }
     )

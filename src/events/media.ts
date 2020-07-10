@@ -2,7 +2,6 @@ import {PubSubEvent} from "./pubsub-event";
 import {Topics} from "../topics";
 
 type Media = {
-  id: string;
   tags: { tag: string }[];
   isSafe: boolean;
 }
