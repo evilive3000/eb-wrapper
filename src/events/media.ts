@@ -1,15 +1,21 @@
 import {PubSubEvent} from "./pubsub-event";
 import {Topics} from "../topics";
 
-abstract class MediaEvent<T extends object = Record<string, any>> extends PubSubEvent {
+type Media = {
+  id: string;
+  tags: { tag: string }[];
+  isSafe: boolean;
+}
+
+abstract class MediaEvent extends PubSubEvent {
   abstract readonly topic: Topics;
 
   data: {
     id: string
-    doc: T
+    doc: Media
   };
 
-  constructor(id: string, doc: T) {
+  constructor(id: string, doc: Media) {
     super();
     this.data = {id, doc}
   }
