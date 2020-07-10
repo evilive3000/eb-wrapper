@@ -14,7 +14,7 @@ class ErrorListener extends Listener<ErrorCaughtEvent> {
 }
 
 class CustomListener extends Listener<MediaUpdatedEvent> {
-  topic = Topics.MediaSafetyUpdated;
+  topic = Topics.MediaUpdated;
   groupName = 'test-subs';
 
   async onMessage(data: MediaUpdatedEvent["data"]): Promise<any> {
@@ -24,14 +24,8 @@ class CustomListener extends Listener<MediaUpdatedEvent> {
   }
 }
 
-ebus.connect({
-  clientId: process.env.CLIENT_ID!,
-  clusterId: process.env.CLUSTER_ID!,
-  url: process.env.URL!
-}).then(() => {
-
+ebus.connect().then(() => {
   ebus.subscribe(new ErrorListener())
   ebus.subscribe(new CustomListener())
-
 }).catch(console.error)
 

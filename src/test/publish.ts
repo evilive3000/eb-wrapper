@@ -1,12 +1,9 @@
 import {ebus} from "../event-bus";
 import {MediaUpdatedEvent} from "../events";
 
-console.log(process.env.URL)
-
 ebus.connect({
-  clientId: process.env.CLIENT_ID!,
-  clusterId: process.env.CLUSTER_ID!,
-  url: process.env.URL!
+  clusterId: process.env.NATS_CID!,
+  url: process.env.NATS_URL!
 }).then((close) => {
 
   return ebus.publish(
