@@ -8,6 +8,7 @@ export abstract class Listener<E extends PubSubEvent> {
   abstract topic: Topics;
   abstract groupName: string;
   protected ackWait = 5 * 1000;
+  protected maxInFlight = 1;
 
   async parseMessage(msg: Message): Promise<E['data']> {
     const data = msg.getData();
@@ -39,7 +40,7 @@ export abstract class Listener<E extends PubSubEvent> {
         .setManualAckMode(true)
         .setAckWait(this.ackWait)
         .setDurableName(this.groupName)
-        .setMaxInFlight(1)
+        .setMaxInFlight(this.maxInFlight)
     )
 
     return subscription.on('message', (msg: Message) => {
