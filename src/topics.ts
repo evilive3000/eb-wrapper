@@ -1,7 +1,8 @@
 export enum Topics {
-  MediaSafetyUpdated = 'media-safety:updated',
   MediaUpdated = 'media:updated',
   MediaDeleted = 'media:deleted',
+  MediaCreated = 'media:created',
   MediaManyTagUpdated = 'media-many-tag:updated',
+  MediaSafetyUpdated = 'media-safety:updated',
   ErrorCaught = 'error',
 }
