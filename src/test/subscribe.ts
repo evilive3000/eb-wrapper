@@ -1,23 +1,13 @@
 import {Listener} from "../listener";
 import {ebus} from "../event-bus";
 import {Topics} from "../topics";
-import {ErrorCaughtEvent} from "../events/error-caught";
-import {MediaUpdatedEvent} from "../events";
+import {MediaCreatedEvent} from "../events";
 
-class ErrorListener extends Listener<ErrorCaughtEvent> {
-  topic = Topics.ErrorCaught;
-  groupName = 'huemoe';
+class CustomListener extends Listener<MediaCreatedEvent> {
+  readonly topic = Topics.MediaCreated;
+  groupName = 'test';
 
-  async onMessage(data: ErrorCaughtEvent["data"]): Promise<any> {
-    console.log({data})
-  }
-}
-
-class CustomListener extends Listener<MediaUpdatedEvent> {
-  topic = Topics.MediaUpdated;
-  groupName = 'test-subs';
-
-  async onMessage(data: MediaUpdatedEvent["data"]): Promise<any> {
+  async onMessage(data: any): Promise<any> {
     // if (Math.random() > 0.75)
     //   throw new Error('Event Error Occurred')
     console.log({data})
@@ -25,7 +15,6 @@ class CustomListener extends Listener<MediaUpdatedEvent> {
 }
 
 ebus.connect().then(() => {
-  ebus.subscribe(new ErrorListener())
   ebus.subscribe(new CustomListener())
 }).catch(console.error)
 
