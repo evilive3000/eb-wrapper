@@ -21,13 +21,13 @@ abstract class MediaEvent extends PubSubEvent {
 }
 
 export class MediaCreatedEvent extends MediaEvent {
-  topic = Topics.MediaCreated;
+  readonly topic = Topics.MediaCreated;
 }
 
 export class MediaDeletedEvent extends MediaEvent {
-  topic = Topics.MediaDeleted;
+  readonly topic = Topics.MediaDeleted;
 }
 
 export class MediaUpdatedEvent extends MediaEvent {
-  topic = Topics.MediaUpdated;
+  readonly topic = Topics.MediaUpdated;
 }

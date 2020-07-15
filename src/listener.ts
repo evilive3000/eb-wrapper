@@ -5,7 +5,7 @@ import {Topics} from "./topics";
 import {ebus} from "./event-bus";
 
 export abstract class Listener<E extends PubSubEvent> {
-  abstract topic: Topics;
+  abstract topic: E["topic"];
   abstract groupName: string;
   protected ackWait = 5 * 1000;
   protected maxInFlight = 1;
